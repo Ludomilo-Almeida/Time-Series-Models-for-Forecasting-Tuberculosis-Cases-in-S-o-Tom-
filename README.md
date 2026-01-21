@@ -2,7 +2,7 @@
 
 
 ![Evolução dos Casos de Tuberculose em STP](grafico_tuberculose_final.png)
-*(O gráfico vai aparecer aqui em grande)*
+
 
 ## 1. Project Overview & Impact
 Tuberculosis (TB) remains a critical public health challenge in São Tomé and Príncipe. Effective resource allocation relies heavily on knowing how many cases to expect in the future. 
