@@ -1,6 +1,5 @@
-# Time-Series-Models-for-Forecasting-Tuberculosis-Cases-in-S-o-Tom-
+# Time-Series-Models-for-Forecasting-Tuberculosis-Cases in São Tomé
 
-# Tuberculosis Incidence Forecasting in São Tomé: A Time Series Approach
 
 ![Evolução dos Casos de Tuberculose em STP](grafico_tuberculose_final.png)
 *(O gráfico vai aparecer aqui em grande)*
