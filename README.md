@@ -1,10 +1,10 @@
 
 # Forecasting Tuberculosis Incidence in São Tomé and Príncipe: A Time Series Analysis (2011-2023)
 
-**Author:** [Seu Nome Completo]  
+**Author:** Ludomilo Rebelo Almeida  
 **Degree:** M.Sc. in Statistical Modeling and Data Analysis  
-**Contact:** [Seu Email ou LinkedIn]
-
+**Contact:** integraltr1@gmail.com
+**Contact1:**www.linkedin.com/in/matla1
 ---
 
 ## Abstract
