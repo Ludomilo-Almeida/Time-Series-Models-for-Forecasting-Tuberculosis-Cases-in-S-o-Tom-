@@ -93,7 +93,7 @@ plt.ylabel('Reported Cases', fontsize=12)
 plt.xlabel('Year', fontsize=12)
 
 # Adicionar uma média móvel (linha vermelha) para suavizar e ver melhor a tendência
-plt.plot(df_final.index, df_final['Casos'].rolling(window=12).mean(), color='red', linewidth=2, label='Média Móvel (12 meses)')
+plt.plot(df_final.index, df_final['Casos'].rolling(window=12).mean(), color='red', linewidth=2, label= 'Moving Average (12 months)')
 
 plt.legend()
 plt.grid(True, alpha=0.3)
