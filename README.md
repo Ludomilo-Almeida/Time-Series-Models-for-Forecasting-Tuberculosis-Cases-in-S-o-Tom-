@@ -2,8 +2,8 @@
 
 # Tuberculosis Incidence Forecasting in São Tomé: A Time Series Approach
 
-![Public Health Data](https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80)
-*(Sugestão: Substitua este link por um gráfico da evolução dos casos que você gerou no projeto)*
+![Evolução dos Casos de Tuberculose em STP](grafico_tuberculose_final.png)
+*(O gráfico vai aparecer aqui em grande)*
 
 ## 1. Project Overview & Impact
 Tuberculosis (TB) remains a critical public health challenge in São Tomé and Príncipe. Effective resource allocation relies heavily on knowing how many cases to expect in the future. 
@@ -12,7 +12,7 @@ The goal of this project was to **model and forecast the incidence of Tuberculos
 
 ## 2. The Data
 The dataset consists of historical records of reported TB cases in São Tomé.
-* **Period:** [2010] to [2018] .
+* **Period:** [2011] to [2023] .
 * **Frequency:** [MENSAL].
 * **Source:** Ministry of Health of São Tomé and Príncipe / National TB Program.
 
