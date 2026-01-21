@@ -88,7 +88,7 @@ plt.figure(figsize=(8, 4))
 plt.plot(df_final.index, df_final['Casos'], marker='o', markersize=4, linestyle='-', color='#2c3e50', linewidth=1.5)
 
 # Títulos
-plt.title('Monthly Evolution of Tuberculosis Cases in São Tomé and Príncipe (2011–2023)', fontsize=14, fontweight='bold')
+plt.title('Evolution (2011–2023)', fontsize=14, fontweight='bold')
 plt.ylabel('Reported Cases', fontsize=12)
 plt.xlabel('Year', fontsize=12)
 
