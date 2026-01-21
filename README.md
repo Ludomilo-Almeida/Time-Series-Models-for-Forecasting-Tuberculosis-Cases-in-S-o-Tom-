@@ -1,56 +1,87 @@
-# Time-Series-Models-for-Forecasting-Tuberculosis-Cases in São Tomé
 
+# Forecasting Tuberculosis Incidence in São Tomé and Príncipe: A Time Series Analysis (2011-2023)
 
-![Evolução dos Casos de Tuberculose em STP](grafico_tuberculose_final.png)
+**Author:** [Seu Nome Completo]  
+**Degree:** M.Sc. in Statistical Modeling and Data Analysis  
+**Contact:** [Seu Email ou LinkedIn]
 
+---
 
-## 1. Project Overview & Impact
-Tuberculosis (TB) remains a critical public health challenge in São Tomé and Príncipe. Effective resource allocation relies heavily on knowing how many cases to expect in the future. 
+## Abstract
+Tuberculosis (TB) remains a critical public health challenge in São Tomé and Príncipe (STP). Accurate forecasting of disease incidence is essential for effective resource allocation and policy-making. This study applies Time Series Analysis, specifically Box-Jenkins ARIMA methodology, to model and forecast monthly TB cases based on data collected from 2011 to 2023. The results provide a statistical basis for anticipating outbreak trends and managing hospital stocks.
 
-The goal of this project was to **model and forecast the incidence of Tuberculosis cases**, providing statistical evidence to support public health officials in decision-making regarding medication stock and hospital resources.
+---
 
-## 2. The Data
-The dataset consists of historical records of reported TB cases in São Tomé.
-* **Period:** [2011] to [2023] .
-* **Frequency:** [MENSAL].
-* **Source:** Ministry of Health of São Tomé and Príncipe / National TB Program.
+## 1. Introduction
+São Tomé and Príncipe, an insular state in the Gulf of Guinea, faces specific epidemiological challenges due to its geography. The National Tuberculosis Control Program requires data-driven insights to improve detection and treatment rates.
 
-## 3. Methodology (Time Series Analysis)
-As a strict mathematical approach, the Box-Jenkins methodology was applied to identify the best fit for the data structure.
+**Objective:**
+The primary objective of this project is to develop a robust statistical model to predict the number of new TB cases for the upcoming months, minimizing the error between predicted and observed values.
 
-1.  **Exploratory Analysis:** Decomposition of the series to identify Trend, Seasonality, and Noise.
-2.  **Stationarity Tests:** Applied Augmented Dickey-Fuller (ADF) test to check for unit roots.
-    * *Result:* The series required 1 order differencing ($d=1$) to become stationary.
-3.  **Model Selection:** Tested multiple ARIMA/SARIMA specifications based on ACF and PACF plots.
-    * Model selection criteria: Lowest AIC (Akaike Information Criterion) and BIC.
-4.  **Residual Analysis:** Verified "White Noise" assumption (Ljung-Box test) and normality of residuals.
+## 2. Methodology
 
-## 4. Models & Results
-The following models were evaluated for forecasting accuracy:
+### 2.1. Data Source and Preprocessing
+The dataset consists of anonymized records of patients diagnosed with Tuberculosis between **January 2011 and December 2023**.
+* **Raw Data:** Individual patient records (Excel format).
+* **Preprocessing:** Data was aggregated into a monthly time series frequency using Python (Pandas). Inconsistencies in date formats were cleaned and mapped to standard datetime objects.
+* **Stationarity:** The series was tested for stationarity using the **Augmented Dickey-Fuller (ADF)** test. Differencing ($d=1$) was applied to stabilize the mean.
 
-* **Model A:** [ARIMA(2,1,1)]
+### 2.2. Mathematical Model (ARIMA)
+The modeling approach followed the Box-Jenkins methodology:
+1.  **Identification:** Analysis of Autocorrelation (ACF) and Partial Autocorrelation (PACF) plots.
+2.  **Estimation:** The parameters $(p, d, q)$ were estimated using Maximum Likelihood.
+3.  **Diagnostic Checking:** Residuals were analyzed for White Noise properties (Ljung-Box test).
 
-
-**Best Model Performance:**
-The **[ARIMA(2,1,1)]** proved to be the most robust predictor.
-* **MAPE (Mean Absolute Percentage Error):** [XX]%
-* **RMSE (Root Mean Square Error):** [XX]
-
-> **Key Finding:** The model predicted a [TENDÊNCIA: Aumento/Diminuição/Estabilidade] in cases for the subsequent period, suggesting the need for [AÇÃO: ex: increased screening campaigns].
-
-## 5. Mathematical Framework
-To model the stochastic component of the series, the general form of the ARIMA model used can be described as:
+The general mathematical form of the ARIMA model used is given by:
 
 $$\phi(B) (1-B)^d X_t = \theta(B) Z_t$$
 
-Where $B$ is the backshift operator, illustrating the dependency on past values and errors.
+Where:
+* $X_t$ is the number of cases at time $t$.
+* $B$ is the backshift operator.
+* $\phi(B)$ and $\theta(B)$ are polynomials of order $p$ and $q$.
+* $Z_t$ is white noise error.
 
-## 6. Tools & Technologies
-* **R Language** (Packages: `forecast`, `tseries`, `ggplot2`)
-* **Statistical Analysis:** Hypothesis Testing, Time Series Decomposition.
+## 3. Results
 
-## 7. Author
-**[O Seu Nome]**
-* *B.Sc. in Mathematics | M.Sc. in Statistical Modeling*
-* [Link para o seu LinkedIn]
+### 3.1. Temporal Evolution
+The analysis of the 12-year period reveals the underlying trend and seasonality of the disease in the region.
 
+![Monthly Evolution of TB Cases](grafico_tuberculose_final.png)
+*Fig 1. Monthly incidence of Tuberculosis cases in STP (Blue) with 12-month Rolling Average (Red).*
+
+### 3.2. Model Performance
+The best-fitting model was identified as **ARIMA(p, d, q)** [Substitua p,d,q pelos seus números, ex: ARIMA(1,1,1)]. The model evaluation metrics on the test set were:
+
+| Metric | Value |
+| :--- | :--- |
+| **MAPE** (Mean Absolute Percentage Error) | [XX]% |
+| **RMSE** (Root Mean Square Error) | [XX] |
+
+## 4. Discussion & Conclusion
+The model successfully captured the seasonal patterns of Tuberculosis in São Tomé. The visualization (Fig 1) suggests a [Tendência: Estabilidade / Ligeiro Aumento / Diminuição] in recent years.
+
+These forecasts can serve as a decision-support tool for the Ministry of Health, ensuring that medication stocks are adjusted *before* peak infection months occur.
+
+---
+
+## 5. Repository Structure
+This project is organized as follows:
+* `data/`: Contains the raw and processed datasets (anonymized).
+* `notebooks/`: Jupyter Notebooks with EDA and Model training.
+* `scripts/`: Python scripts for data cleaning (`clean_data.py`).
+* `README.md`: Project documentation.
+
+## 6. How to Run this Project
+
+To reproduce the results, follow these steps:
+
+```bash
+# Clone the repository
+git clone [https://github.com/](https://github.com/)[SeuUsuario]/[NomeDoRepo].git
+
+# Install dependencies
+pip install pandas matplotlib statsmodels openpyxl
+
+# Run the analysis script
+python code1.py
