@@ -4,7 +4,6 @@
 **Author:** Ludomilo Rebelo Almeida  
 **Degree:** M.Sc. in Statistical Modeling and Data Analysis  
 **Contact:** integraltr1@gmail.com
-**Contact1:** www.linkedin.com/in/matla1
 ---
 
 ## Abstract
