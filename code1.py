@@ -84,7 +84,7 @@ print(f"Total de casos contabilizados: {df_final['Casos'].sum()}")
 df_final.to_csv('tuberculose_stp_processado.csv')
 
 # --- 6. Gráfico Profissional ---
-plt.figure(figsize=(12, 6))
+plt.figure(figsize=(8, 4))
 plt.plot(df_final.index, df_final['Casos'], marker='o', markersize=4, linestyle='-', color='#2c3e50', linewidth=1.5)
 
 # Títulos
