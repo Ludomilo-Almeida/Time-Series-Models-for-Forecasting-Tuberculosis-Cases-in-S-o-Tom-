@@ -88,9 +88,9 @@ plt.figure(figsize=(12, 6))
 plt.plot(df_final.index, df_final['Casos'], marker='o', markersize=4, linestyle='-', color='#2c3e50', linewidth=1.5)
 
 # Títulos
-plt.title('Evolução Mensal de Casos de Tuberculose em STP (2011-2023)', fontsize=14, fontweight='bold')
-plt.ylabel('Novos Casos Registados', fontsize=12)
-plt.xlabel('Ano', fontsize=12)
+plt.title('Monthly Evolution of Tuberculosis Cases in São Tomé and Príncipe (2011–2023)', fontsize=14, fontweight='bold')
+plt.ylabel('Reported Cases', fontsize=12)
+plt.xlabel('Year', fontsize=12)
 
 # Adicionar uma média móvel (linha vermelha) para suavizar e ver melhor a tendência
 plt.plot(df_final.index, df_final['Casos'].rolling(window=12).mean(), color='red', linewidth=2, label='Média Móvel (12 meses)')
