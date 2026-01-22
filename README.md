@@ -27,10 +27,11 @@ The dataset consists of anonymized records of patients diagnosed with Tuberculos
 
 ### 2.2. Mathematical Model (ARIMA)
 The modeling approach followed the Box-Jenkins methodology:
-1.  **Identification:** Analysis of Autocorrelation (ACF) and Partial Autocorrelation (PACF) plots.
-2.  **Estimation:** The parameters $(p, d, q)$ were estimated using Maximum Likelihood.
-3.  **Diagnostic Checking:** Residuals were analyzed for White Noise properties (Ljung-Box test).
-3.  **Peveded:**
+1. **Identification:** Analysis of Autocorrelation (ACF) and Partial Autocorrelation (PACF) plots.
+2. **Estimation:** The parameters $(p, d, q)$ were estimated using Maximum Likelihood.
+3. **Diagnostic Checking:** Residuals were analyzed for White Noise properties (Ljung-Box test).
+4. **Forecasting:** The validated model was used to produce out-of-sample forecasts with confidence intervals.
+
 
 The general mathematical form of the ARIMA model used is given by:
 
