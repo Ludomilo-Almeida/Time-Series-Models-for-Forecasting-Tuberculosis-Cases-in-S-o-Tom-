@@ -1,15 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
 from statsmodels.tsa.stattools import adfuller
-from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
-from statsmodels.tsa.seasonal import seasonal_decompose
-from statsmodels.tsa.statespace.sarimax import SARIMAX # Agora usamos SARIMAX
-from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 # %%
 # ==========================================
-# CÉLULA 1: CARREGAR E LIMPAR DADOS
+# CÉLULA 1: CARREGAR E LIMPAR (Corra esta apenas uma vez)
 # ==========================================
 print("--- A CARREGAR DADOS ---")
 try:
@@ -42,9 +37,10 @@ df_final = df_final.asfreq('MS', fill_value=0)
 
 print("Série Temporal pronta! (Célula 1 concluída)")
 
+
 # %%
 # ==========================================
-# CÉLULA 2: FUNÇÃO DE TESTE ADF (Estacionaridade)
+# CÉLULA 2: ESTATÍSTICA (Teste ADF)
 # ==========================================
 def realizar_teste_adf(serie, nome="Série"):
     print(f"\n--- TESTE DICKEY-FULLER: {nome} ---")
@@ -60,165 +56,262 @@ def realizar_teste_adf(serie, nome="Série"):
     else:
         print(">> CONCLUSÃO: A série NÃO é estacionária (p > 0.05).")
 
+# Executar Testes
+realizar_teste_adf(df_final['Casos'], nome="Original")
+diff_1 = df_final['Casos'].diff()
+realizar_teste_adf(diff_1, nome="1ª Diferença (d=1)")
+
+
 # %%
 # ==========================================
-# CÉLULA 3: VERIFICAÇÃO DE SAZONALIDADE (NOVO)
+# CÉLULA 3: GRÁFICO (Pode correr esta muitas vezes para ajustar visual)
 # ==========================================
-print("\n--- A VERIFICAR SAZONALIDADE (Decomposição) ---")
+plt.figure(figsize=(10, 5))
 
-# Decompor a série em: Tendência, Sazonalidade e Resíduos
-decomposicao = seasonal_decompose(df_final['Casos'], model='additive')
+# Apenas os dados reais
+plt.plot(df_final.index, df_final['Casos'], 
+         marker='o', markersize=4, linestyle='-', 
+         color='#2c3e50', linewidth=1.5, label='Casos Observados')
 
-# Plotar a decomposição para análise visual
-fig = decomposicao.plot()
-fig.set_size_inches(12, 8)
+plt.title('Evolution of Tuberculosis Cases (2011–2023)', fontsize=14, fontweight='bold')
+plt.ylabel('Reported Cases', fontsize=12)
+plt.xlabel('Year', fontsize=12)
+plt.legend()
+plt.grid(True, alpha=0.3)
 plt.tight_layout()
+
+print("A guardar gráfico...")
+plt.savefig('grafico_tuberculose_final.png')
 plt.show()
 
-# Teste ADF na série original
-realizar_teste_adf(df_final['Casos'], nome="Original")
 
 # %%
 # ==========================================
-# CÉLULA 4: APLICAR DIFERENÇAS (Normal e Sazonal)
+# CÉLULA 4: APLICAR 1ª DIFERENÇA (d=1)
 # ==========================================
-# 1. Diferença Normal (d=1) -> Remove tendência
+# 1. Calcular a Diferença (Mês atual - Mês anterior)
 df_final['Diff_1'] = df_final['Casos'].diff()
 
-# 2. Diferença Sazonal (D=1, s=12) -> Remove padrão anual
-# Subtrai o Janeiro deste ano pelo Janeiro do ano passado
-df_final['Diff_Sazonal'] = df_final['Casos'].diff(12)
+# 2. Testar se a Diferença tornou a série Estacionária
+print("\n--- TESTE ADF: 1ª Diferença (d=1) ---")
+# O primeiro valor fica NaN na diferença, temos de o ignorar no teste
+diff_clean = df_final['Diff_1'].dropna() 
+result_diff = adfuller(diff_clean)
 
-# 3. Diferença Combinada (Primeiro faz sazonal, depois normal)
-df_final['Diff_Total'] = df_final['Diff_Sazonal'].diff()
+print(f'Estatística: {result_diff[0]:.4f}')
+print(f'Valor-p:     {result_diff[1]:.4f}')
 
-print("\n--- TESTES NAS DIFERENÇAS ---")
-realizar_teste_adf(df_final['Diff_1'], nome="1ª Diferença (Tendência)")
-realizar_teste_adf(df_final['Diff_Sazonal'], nome="Diferença Sazonal (12 meses)")
-realizar_teste_adf(df_final['Diff_Total'], nome="Diferença Total (Tendência + Sazonal)")
+if result_diff[1] < 0.05:
+    print(">> CONCLUSÃO: A série diferenciada é ESTACIONÁRIA. Podemos seguir para ACF/PACF.")
+else:
+    print(">> CONCLUSÃO: A série ainda não é estacionária.")
 
-# Gráfico da Diferença Sazonal
-plt.figure(figsize=(10, 4))
-plt.plot(df_final.index, df_final['Diff_Sazonal'], color='#e67e22', label='Diferença Sazonal (12 meses)')
-plt.axhline(0, color='black', linestyle='--', alpha=0.5)
-plt.title('Série após Diferenciação Sazonal')
+# 3. Gráfico da Diferença
+plt.figure(figsize=(10, 5))
+plt.plot(df_final.index, df_final['Diff_1'], 
+         marker='o', markersize=4, linestyle='-', 
+         color='#e74c3c', linewidth=1.5, label='1ª Diferença')
+
+plt.axhline(y=0, color='black', linestyle='--', alpha=0.5) # Linha de referência no zero
+plt.title('Stationarity Check: 1st Difference', fontsize=14, fontweight='bold')
+plt.ylabel('Change in Cases', fontsize=12)
 plt.legend()
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
 plt.show()
 
 # %%
 # ==========================================
-# CÉLULA 5: IDENTIFICAÇÃO (ACF/PACF na Série Sazonal)
+# CÉLULA 5: IDENTIFICAÇÃO DO MODELO (ACF e PACF)
 # ==========================================
-# Vamos olhar para a série diferenciada sazonalmente
-series_to_plot = df_final['Diff_Sazonal'].dropna()
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 
+# Configurar a figura com 2 gráficos
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
 
-# ACF
-plot_acf(series_to_plot, lags=36, ax=ax1, title='ACF (Autocorrelação) - Série Sazonal')
-# PACF
-plot_pacf(series_to_plot, lags=36, ax=ax2, title='PACF (Autocorrelação Parcial) - Série Sazonal')
+# 1. Plotar ACF (Autocorrelação) -> Ajuda a escolher o 'q' (Moving Average)
+# Usamos o .dropna() porque a diferenciação cria valores vazios no início
+plot_acf(df_final['Diff_1'].dropna(), lags=20, ax=ax1, 
+         title='Autocorrelation (ACF) - Indica o valor de q (MA)')
+
+# 2. Plotar PACF (Autocorrelação Parcial) -> Ajuda a escolher o 'p' (AutoRegressive)
+plot_pacf(df_final['Diff_1'].dropna(), lags=20, ax=ax2, 
+          title='Partial Autocorrelation (PACF) - Indica o valor de p (AR)')
 
 plt.tight_layout()
 plt.show()
 
 # %%
 # ==========================================
-# CÉLULA 6: TREINAR MODELO SARIMA (Seasonal ARIMA)
+# CÉLULA 6: COMPARAÇÃO ROBUSTA (AIC & BIC)
 # ==========================================
-# SARIMA requer: (p,d,q) normais X (P,D,Q,s) sazonais
-# Sazonalidade (s) = 12 (Mensal)
-print("\n--- A TREINAR MODELO SARIMA (1,1,1)x(1,1,1,12) ---")
+from statsmodels.tsa.arima.model import ARIMA
+import pandas as pd
 
-model_sarima = SARIMAX(df_final['Casos'], 
-                       order=(1, 1, 1),              # Parte não sazonal (p,d,q)
-                       seasonal_order=(1, 1, 1, 12), # Parte sazonal (P,D,Q,s)
-                       enforce_stationarity=False,
-                       enforce_invertibility=False)
+print("\n--- COMPARAÇÃO DE MODELOS: ARIMA(2,1,1) vs ARIMA(1,1,1) ---")
 
-model_fit = model_sarima.fit(disp=False)
+# 1. Ajustar Modelo A: ARIMA(2, 1, 1)
+model_211 = ARIMA(df_final['Casos'], order=(2, 1, 1))
+res_211 = model_211.fit()
 
+# 2. Ajustar Modelo B: ARIMA(1, 1, 1)
+model_111 = ARIMA(df_final['Casos'], order=(1, 1, 1))
+res_111 = model_111.fit()
+
+# 3. Tabela Comparativa
+resultados = pd.DataFrame({
+    'Modelo': ['ARIMA(2,1,1)', 'ARIMA(1,1,1)'],
+    'AIC': [res_211.aic, res_111.aic],
+    'BIC': [res_211.bic, res_111.bic]
+})
+
+print(resultados)
+
+# 4. Decisão Automática
+# Vamos ver qual ganha no AIC (que é o mais importante para previsão)
+melhor_aic = resultados.loc[resultados['AIC'].idxmin()]
+
+print("\n------------------------------------------------")
+print(f">> VENCEDOR PELO AIC: {melhor_aic['Modelo']}")
+print(f"   (AIC: {melhor_aic['AIC']:.4f})")
+print("------------------------------------------------")
+
+# Diagnóstico visual do vencedor
+if melhor_aic['Modelo'] == 'ARIMA(2,1,1)':
+    best_model = res_211
+else:
+    best_model = res_111
+
+print(f"\nResumo estatístico do vencedor ({melhor_aic['Modelo']}):")
+print(best_model.summary())
+
+# Gráfico de diagnóstico
+best_model.plot_diagnostics(figsize=(10, 8))
+plt.tight_layout()
+plt.show()
+
+# %%
+# ==========================================
+# CÉLULA 7: ESTIMAÇÃO DE PARÂMETROS (ARIMA 1,1,1)
+# ==========================================
+from statsmodels.tsa.arima.model import ARIMA
+
+print("\n--- RESUMO DO MODELO ARIMA(1,1,1) ---")
+
+# Treinar o modelo
+model_final = ARIMA(df_final['Casos'], order=(1, 1, 1))
+model_fit = model_final.fit()
+
+# Mostrar a tabela completa com os coeficientes
 print(model_fit.summary())
 
-# Diagnóstico
-model_fit.plot_diagnostics(figsize=(10, 8))
-plt.tight_layout()
-plt.show()
+# Se quiser ver os coeficientes isolados:
+print("\nParâmetros Isolados:")
+print(f"AR(1): {model_fit.params['ar.L1']:.4f}")
+print(f"MA(1): {model_fit.params['ma.L1']:.4f}")
+print(f"Sigma2: {model_fit.params['sigma2']:.4f}")
 
 # %%
 # ==========================================
-# CÉLULA 7: AVALIAÇÃO DE DESEMPENHO (SARIMA)
+# CÉLULA 8: AVALIAÇÃO DE DESEMPENHO (Performance)
 # ==========================================
-print("\n--- PERFORMANCE DO MODELO SARIMA ---")
+import numpy as np
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 
+print("\n--- MODEL PERFORMANCE (IN-SAMPLE) ---")
+
+# 1. Obter valores previstos pelo modelo (Fitted Values)
+# O modelo tenta 'prever' o passado para ver se aprendeu bem
 predictions = model_fit.fittedvalues
 observed = df_final['Casos']
 
-# Métricas
+# 2. Calcular Métricas de Erro
+# RMSE: Raiz do Erro Quadrático Médio (Penaliza grandes erros)
 rmse = np.sqrt(mean_squared_error(observed, predictions))
+
+# MAE: Erro Médio Absoluto (Média simples dos erros)
 mae = mean_absolute_error(observed, predictions)
 
+# MAPE: Erro Percentual (Cuidado com divisões por zero!)
+# Vamos calcular apenas onde os casos reais > 0 para não dar erro
 mask = observed != 0
 mape = np.mean(np.abs((observed[mask] - predictions[mask]) / observed[mask])) * 100
 
-print(f"RMSE (Erro Quadrático Médio): {rmse:.4f}")
-print(f"MAE  (Erro Absoluto Médio):   {mae:.4f}")
-print(f"MAPE (Erro Percentual):       {mape:.2f}%")
-print(f"AIC do Modelo: {model_fit.aic:.4f}")
+print(f"RMSE (Root Mean Square Error): {rmse:.4f}")
+print(f"MAE  (Mean Absolute Error):    {mae:.4f}")
+print(f"MAPE (Mean Abs. Perc. Error):  {mape:.2f}%")
 
-# Gráfico de Ajuste
+# 3. Gráfico: Real vs Modelo
 plt.figure(figsize=(12, 6))
-plt.plot(observed.index, observed, 'o', color='gray', alpha=0.4, label='Real')
-# Começamos o plot mais à frente porque o SARIMA perde os primeiros 12 meses
-plt.plot(predictions.index[13:], predictions[13:], color='#2980b9', linewidth=2, label='Ajuste SARIMA')
+
+# Dados Reais (Pontos cinzentos)
+plt.plot(observed.index, observed, 'o', color='gray', alpha=0.5, label='Casos Reais')
+
+# Linha do Modelo (Azul)
+plt.plot(predictions.index, predictions, color='#2980b9', linewidth=2, label='Ajuste do Modelo (ARIMA)')
+
+plt.title(f'Model Performance: Real vs Fitted (RMSE={rmse:.2f})', fontsize=14, fontweight='bold')
 plt.legend()
-plt.title(f'Ajuste do Modelo Sazonal (RMSE={rmse:.2f})')
+plt.ylabel('Casos')
 plt.grid(True, alpha=0.3)
+plt.tight_layout()
+
+print("A guardar gráfico de performance...")
+plt.savefig('grafico_performance_modelo.png')
 plt.show()
+
 
 # %%
 # ==========================================
-# CÉLULA 8: PREVISÃO FINAL COM CURVAS (3 ANOS)
+# CÉLULA 9: PREVISÃO FUTURA (FORECASTING)
 # ==========================================
-print("\n--- A CALCULAR PREVISÃO SAZONAL (2024-2026) ---")
+print("\n--- A CALCULAR PREVISÕES (2024-2025) ---")
 
-# Previsão para 36 meses (3 anos)
+# 1. Definir quantos meses queremos prever para a frente
+# Vamos prever 24 meses (2 anos)
 meses_futuros = 36
-forecast_res = model_fit.get_forecast(steps=meses_futuros)
-forecast_vals = forecast_res.predicted_mean
-conf_int = forecast_res.conf_int(alpha=0.05)
+forecast_object = model_fit.get_forecast(steps=meses_futuros)
 
-# Setup gráfico completo
-plt.figure(figsize=(14, 7))
+# 2. Extrair os dados da previsão
+forecast_mean = forecast_object.predicted_mean
+conf_int = forecast_object.conf_int(alpha=0.05) # Intervalo de Confiança de 95%
 
-# 1. Histórico
-plt.plot(df_final.index, df_final['Casos'], 
-         label='Histórico', color='#2c3e50', alpha=0.7)
+# Criar datas futuras para o eixo X
+last_date = df_final.index[-1]
+forecast_dates = pd.date_range(start=last_date + pd.DateOffset(months=1), 
+                               periods=meses_futuros, freq='MS')
 
-# 2. Ajuste (Treino)
-plt.plot(model_fit.fittedvalues.index, model_fit.fittedvalues, 
-         label='Ajuste Modelo', color='#2980b9', alpha=0.6, linewidth=1)
+# Atribuir as datas à série de previsão
+forecast_mean.index = forecast_dates
+conf_int.index = forecast_dates
 
-# 3. Previsão Futura (SARIMA acompanha as curvas!)
-plt.plot(forecast_vals.index, forecast_vals, 
-         label='Previsão (3 Anos)', color='#c0392b', linewidth=2.5)
+# 3. Gráfico Final: Passado + Futuro
+plt.figure(figsize=(12, 6))
 
-# 4. Intervalo de Confiança
-plt.fill_between(forecast_vals.index, 
+# A) Dados Históricos (Passado)
+plt.plot(df_final.index, df_final['Casos'], label='Histórico (2011-2023)', color='#2c3e50')
+
+# B) Previsão (Futuro)
+plt.plot(forecast_mean.index, forecast_mean, label='Previsão (2024-2025)', color='#e74c3c', linestyle='--', linewidth=2)
+
+# C) Intervalo de Confiança (Sombra)
+# Mostra a margem de erro (onde o valor real provavelmente vai cair)
+plt.fill_between(conf_int.index, 
                  conf_int.iloc[:, 0], 
                  conf_int.iloc[:, 1], 
-                 color='#c0392b', alpha=0.15)
+                 color='#e74c3c', alpha=0.2, label='Intervalo de Confiança (95%)')
 
-plt.title('Previsão Sazonal de Tuberculose (SARIMA) - Acompanhando as Curvas', fontsize=16, fontweight='bold')
-plt.xlabel('Ano')
-plt.ylabel('Casos')
+plt.title('Tuberculosis Forecast in São Tomé and Príncipe (2024-2026)', fontsize=14, fontweight='bold')
+plt.xlabel('Year', fontsize=12)
+plt.ylabel('Projected Cases', fontsize=12)
 plt.legend(loc='upper left')
 plt.grid(True, alpha=0.3)
 plt.tight_layout()
 
-print("A guardar 'grafico_sarima_final.png'...")
-plt.savefig('grafico_sarima_final.png')
+print("A guardar gráfico de previsão...")
+plt.savefig('grafico_previsao_futura.png')
 plt.show()
 
-print("\nPrimeiros 6 meses previstos:")
-print(forecast_vals.head(6))
+# 4. Mostrar os números exatos dos primeiros 6 meses previstos
+print("\nPrevisão para os próximos 6 meses:")
+print(forecast_mean.head(6))
