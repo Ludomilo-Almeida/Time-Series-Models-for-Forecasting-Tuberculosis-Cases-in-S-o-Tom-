@@ -51,8 +51,9 @@ The analysis of the 12-year period reveals the underlying trend and seasonality 
 ![Monthly Evolution of TB Cases](grafico_tuberculose_final.png)
 *Fig 1. Monthly incidence of Tuberculosis cases in STP (Blue) with 12-month Rolling Average (Red).*
 
+
 ### 3.2. Model Performance
-The best-fitting model was identified as **ARIMA(p, d, q)** [Substitua p,d,q pelos seus números, ex: ARIMA(1,1,1)]. The model evaluation metrics on the test set were:
+The best-fitting model was identified as **ARIMA(1, 1, 1)**. The model evaluation metrics on the test set were:
 
 | Metric | Value |
 | :--- | :--- |
@@ -86,3 +87,4 @@ pip install pandas matplotlib statsmodels openpyxl
 
 # Run the analysis script
 python code1.py
+

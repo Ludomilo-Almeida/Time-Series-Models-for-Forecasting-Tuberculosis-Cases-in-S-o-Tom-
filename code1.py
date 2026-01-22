@@ -139,3 +139,73 @@ plot_pacf(df_final['Diff_1'].dropna(), lags=20, ax=ax2,
 
 plt.tight_layout()
 plt.show()
+
+# %%
+# ==========================================
+# CÉLULA 6: COMPARAÇÃO ROBUSTA (AIC & BIC)
+# ==========================================
+from statsmodels.tsa.arima.model import ARIMA
+import pandas as pd
+
+print("\n--- COMPARAÇÃO DE MODELOS: ARIMA(2,1,1) vs ARIMA(1,1,1) ---")
+
+# 1. Ajustar Modelo A: ARIMA(2, 1, 1)
+model_211 = ARIMA(df_final['Casos'], order=(2, 1, 1))
+res_211 = model_211.fit()
+
+# 2. Ajustar Modelo B: ARIMA(1, 1, 1)
+model_111 = ARIMA(df_final['Casos'], order=(1, 1, 1))
+res_111 = model_111.fit()
+
+# 3. Tabela Comparativa
+resultados = pd.DataFrame({
+    'Modelo': ['ARIMA(2,1,1)', 'ARIMA(1,1,1)'],
+    'AIC': [res_211.aic, res_111.aic],
+    'BIC': [res_211.bic, res_111.bic]
+})
+
+print(resultados)
+
+# 4. Decisão Automática
+# Vamos ver qual ganha no AIC (que é o mais importante para previsão)
+melhor_aic = resultados.loc[resultados['AIC'].idxmin()]
+
+print("\n------------------------------------------------")
+print(f">> VENCEDOR PELO AIC: {melhor_aic['Modelo']}")
+print(f"   (AIC: {melhor_aic['AIC']:.4f})")
+print("------------------------------------------------")
+
+# Diagnóstico visual do vencedor
+if melhor_aic['Modelo'] == 'ARIMA(2,1,1)':
+    best_model = res_211
+else:
+    best_model = res_111
+
+print(f"\nResumo estatístico do vencedor ({melhor_aic['Modelo']}):")
+print(best_model.summary())
+
+# Gráfico de diagnóstico
+best_model.plot_diagnostics(figsize=(10, 8))
+plt.tight_layout()
+plt.show()
+
+# %%
+# ==========================================
+# CÉLULA 7: ESTIMAÇÃO DE PARÂMETROS (ARIMA 1,1,1)
+# ==========================================
+from statsmodels.tsa.arima.model import ARIMA
+
+print("\n--- RESUMO DO MODELO ARIMA(1,1,1) ---")
+
+# Treinar o modelo
+model_final = ARIMA(df_final['Casos'], order=(1, 1, 1))
+model_fit = model_final.fit()
+
+# Mostrar a tabela completa com os coeficientes
+print(model_fit.summary())
+
+# Se quiser ver os coeficientes isolados:
+print("\nParâmetros Isolados:")
+print(f"AR(1): {model_fit.params['ar.L1']:.4f}")
+print(f"MA(1): {model_fit.params['ma.L1']:.4f}")
+print(f"Sigma2: {model_fit.params['sigma2']:.4f}")
