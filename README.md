@@ -78,13 +78,5 @@ This project is organized as follows:
 
 To reproduce the results, follow these steps:
 
-```bash
-# Clone the repository
-git clone [https://github.com/](https://github.com/)[SeuUsuario]/[NomeDoRepo].git
 
-# Install dependencies
-pip install pandas matplotlib statsmodels openpyxl
-
-# Run the analysis script
-python code1.py
 
