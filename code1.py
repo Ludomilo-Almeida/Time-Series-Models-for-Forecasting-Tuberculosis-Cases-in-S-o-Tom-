@@ -209,3 +209,52 @@ print("\nParâmetros Isolados:")
 print(f"AR(1): {model_fit.params['ar.L1']:.4f}")
 print(f"MA(1): {model_fit.params['ma.L1']:.4f}")
 print(f"Sigma2: {model_fit.params['sigma2']:.4f}")
+
+# %%
+# ==========================================
+# CÉLULA 8: AVALIAÇÃO DE DESEMPENHO (Performance)
+# ==========================================
+import numpy as np
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+
+print("\n--- MODEL PERFORMANCE (IN-SAMPLE) ---")
+
+# 1. Obter valores previstos pelo modelo (Fitted Values)
+# O modelo tenta 'prever' o passado para ver se aprendeu bem
+predictions = model_fit.fittedvalues
+observed = df_final['Casos']
+
+# 2. Calcular Métricas de Erro
+# RMSE: Raiz do Erro Quadrático Médio (Penaliza grandes erros)
+rmse = np.sqrt(mean_squared_error(observed, predictions))
+
+# MAE: Erro Médio Absoluto (Média simples dos erros)
+mae = mean_absolute_error(observed, predictions)
+
+# MAPE: Erro Percentual (Cuidado com divisões por zero!)
+# Vamos calcular apenas onde os casos reais > 0 para não dar erro
+mask = observed != 0
+mape = np.mean(np.abs((observed[mask] - predictions[mask]) / observed[mask])) * 100
+
+print(f"RMSE (Root Mean Square Error): {rmse:.4f}")
+print(f"MAE  (Mean Absolute Error):    {mae:.4f}")
+print(f"MAPE (Mean Abs. Perc. Error):  {mape:.2f}%")
+
+# 3. Gráfico: Real vs Modelo
+plt.figure(figsize=(12, 6))
+
+# Dados Reais (Pontos cinzentos)
+plt.plot(observed.index, observed, 'o', color='gray', alpha=0.5, label='Casos Reais')
+
+# Linha do Modelo (Azul)
+plt.plot(predictions.index, predictions, color='#2980b9', linewidth=2, label='Ajuste do Modelo (ARIMA)')
+
+plt.title(f'Model Performance: Real vs Fitted (RMSE={rmse:.2f})', fontsize=14, fontweight='bold')
+plt.legend()
+plt.ylabel('Casos')
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+
+print("A guardar gráfico de performance...")
+plt.savefig('grafico_performance_modelo.png')
+plt.show()
