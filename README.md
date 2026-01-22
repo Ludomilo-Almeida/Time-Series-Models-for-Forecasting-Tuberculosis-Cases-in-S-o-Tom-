@@ -57,8 +57,8 @@ The best-fitting model was identified as **ARIMA(1, 1, 1)**. The model evaluatio
 
 | Metric | Value |
 | :--- | :--- |
-| **MAPE** (Mean Absolute Percentage Error) | [41.6]% |
-| **RMSE** (Root Mean Square Error) | [4.7] |
+| **MAPE** (Mean Absolute Percentage Error) | 41.6% |
+| **RMSE** (Root Mean Square Error) | 4.7 |
 
 ## 4. Discussion & Conclusion
 The model successfully captured the seasonal patterns of Tuberculosis in São Tomé. The visualization (Fig 1) suggests a [Tendência: Estabilidade / Ligeiro Aumento / Diminuição] in recent years.
