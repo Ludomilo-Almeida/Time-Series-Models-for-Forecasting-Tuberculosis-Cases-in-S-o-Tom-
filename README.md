@@ -49,7 +49,7 @@ Where:
 The analysis of the 12-year period reveals the underlying trend and seasonality of the disease in the region.
 
 ![Monthly Evolution of TB Cases](grafico_tuberculose_final.png)
-*Fig 1. Monthly incidence of Tuberculosis cases in STP (Blue) with 12-month Rolling Average (Red).*
+*Fig 1. Monthly incidence of Tuberculosis cases in STP *
 
 
 ### 3.2. Model Performance
