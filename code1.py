@@ -83,3 +83,59 @@ plt.tight_layout()
 print("A guardar gráfico...")
 plt.savefig('grafico_tuberculose_final.png')
 plt.show()
+
+# %%
+# ==========================================
+# CÉLULA 4: APLICAR 1ª DIFERENÇA (d=1)
+# ==========================================
+# 1. Calcular a Diferença (Mês atual - Mês anterior)
+df_final['Diff_1'] = df_final['Casos'].diff()
+
+# 2. Testar se a Diferença tornou a série Estacionária
+print("\n--- TESTE ADF: 1ª Diferença (d=1) ---")
+# O primeiro valor fica NaN na diferença, temos de o ignorar no teste
+diff_clean = df_final['Diff_1'].dropna() 
+result_diff = adfuller(diff_clean)
+
+print(f'Estatística: {result_diff[0]:.4f}')
+print(f'Valor-p:     {result_diff[1]:.4f}')
+
+if result_diff[1] < 0.05:
+    print(">> CONCLUSÃO: A série diferenciada é ESTACIONÁRIA. Podemos seguir para ACF/PACF.")
+else:
+    print(">> CONCLUSÃO: A série ainda não é estacionária.")
+
+# 3. Gráfico da Diferença
+plt.figure(figsize=(10, 5))
+plt.plot(df_final.index, df_final['Diff_1'], 
+         marker='o', markersize=4, linestyle='-', 
+         color='#e74c3c', linewidth=1.5, label='1ª Diferença')
+
+plt.axhline(y=0, color='black', linestyle='--', alpha=0.5) # Linha de referência no zero
+plt.title('Stationarity Check: 1st Difference', fontsize=14, fontweight='bold')
+plt.ylabel('Change in Cases', fontsize=12)
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+# %%
+# ==========================================
+# CÉLULA 5: IDENTIFICAÇÃO DO MODELO (ACF e PACF)
+# ==========================================
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+
+# Configurar a figura com 2 gráficos
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+
+# 1. Plotar ACF (Autocorrelação) -> Ajuda a escolher o 'q' (Moving Average)
+# Usamos o .dropna() porque a diferenciação cria valores vazios no início
+plot_acf(df_final['Diff_1'].dropna(), lags=20, ax=ax1, 
+         title='Autocorrelation (ACF) - Indica o valor de q (MA)')
+
+# 2. Plotar PACF (Autocorrelação Parcial) -> Ajuda a escolher o 'p' (AutoRegressive)
+plot_pacf(df_final['Diff_1'].dropna(), lags=20, ax=ax2, 
+          title='Partial Autocorrelation (PACF) - Indica o valor de p (AR)')
+
+plt.tight_layout()
+plt.show()
